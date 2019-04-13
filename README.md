@@ -1,8 +1,15 @@
 # BACKEND
 
+Backend for mood-sentiment measure plugin.
+
 ## Setup
 
-Using Google Speech-To-Text requires credentials are required to pass to app.
+Using Google Speech-To-Text requires credentials - json is required to pass to app.
+
+To start up start services:
+- Eureka
+- Zuul
+- Text, Audio, WitAI
 
 ## Services
 
@@ -32,3 +39,4 @@ To obtain results first it translates audio to text using Google Cloud Speech-Te
 - Netflix Zuul
 - Netflix Eureka
 - Google Cloud (Speech-To-Text)
+- Python

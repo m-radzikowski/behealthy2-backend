@@ -4,7 +4,7 @@ import co.blasthack.mood.audio.model.MoodAudioMessage;
 import co.blasthack.mood.audio.model.MoodTextMessage;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.speech.v1.*;
+import com.google.cloud.speech.v1p1beta1.*;
 import com.google.protobuf.ByteString;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ResourceUtils;
@@ -16,9 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/")
@@ -37,25 +35,23 @@ class HomeController {
     public String test() throws IOException {
         File audioSample = loadAudioSample();
         byte[] data = Files.readAllBytes(audioSample.toPath());
-        String audioResponse = audioTranscription(data, "en-EN");
-
+        String audioResponse = audioTranscription(data);
         return "Text: " + audioResponse;
     }
 
     @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")
     public @ResponseBody
     String rateMoodOfText(@RequestBody MoodAudioMessage data) {
-        String transcribedAudio = audioTranscription(data.getMessage(), "pl-PL");
-        MoodTextMessage textMessage = new MoodTextMessage("text-id", transcribedAudio);
+        String transcribedAudio = audioTranscription(data.getMessage());
+        MoodTextMessage textMessage = new MoodTextMessage(transcribedAudio);
 
         ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
         return result.getBody();
     }
 
-    private String audioTranscription(byte[] audioData, String locale) {
+    private String audioTranscription(byte[] audioData) {
         StringBuilder textResponse = new StringBuilder();
         try {
-
             FileInputStream credentialsStream = new FileInputStream("C:/Java/speech-credentials.json");
             GoogleCredentials credentials = GoogleCredentials.fromStream(credentialsStream);
             FixedCredentialsProvider credentialsProvider = FixedCredentialsProvider.create(credentials);
@@ -65,26 +61,26 @@ class HomeController {
                     .build();
 
             SpeechClient speechClient = SpeechClient.create(speechSettings);
-
             ByteString audioBytes = ByteString.copyFrom(audioData);
 
-            // Builds the sync recognize request
             RecognitionConfig config = RecognitionConfig.newBuilder()
-                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                    .setLanguageCode(locale)
+                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16) // LINEAR16 for WAV
+                    .setLanguageCode("pl-PL")
+                    .setEnableAutomaticPunctuation(false)
+                    //.setSampleRateHertz(48000)
+                    .setModel("command_and_search") // default
                     .build();
 
-            RecognitionAudio audio = RecognitionAudio.newBuilder()
+            RecognitionAudio audioConfig = RecognitionAudio.newBuilder()
                     .setContent(audioBytes)
                     .build();
 
-            // Performs speech recognition on the audio file
-            RecognizeResponse response = speechClient.recognize(config, audio);
+            RecognizeResponse response = speechClient.recognize(config, audioConfig);
             List<SpeechRecognitionResult> results = response.getResultsList();
 
+            System.out.print("Obtained Google Cloud response.");
+
             for (SpeechRecognitionResult result : results) {
-                // There can be several alternative transcripts for a given chunk of speech. Just use the
-                // first (most likely) one here.
                 SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
                 System.out.printf("Transcription: %s%n", alternative.getTranscript());
                 textResponse.append(alternative.getTranscript());
@@ -97,6 +93,7 @@ class HomeController {
     }
 
     private File loadAudioSample() throws FileNotFoundException {
-        return ResourceUtils.getFile("classpath:sample.wav");
+        return ResourceUtils.getFile("classpath:sample_pl.wav");
+        //return ResourceUtils.getFile("classpath:sample_pl.webm");
     }
 }
