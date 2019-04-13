@@ -111,7 +111,7 @@ if __name__ == '__main__':
             set_witai_dependencies()
         else:
             print('Wrong name.')
-        app.run(debug=True)
+        app.run(debug=True, host='0.0.0.0')
     else:
         print('NPL api name hasn\'t been provided')
     
