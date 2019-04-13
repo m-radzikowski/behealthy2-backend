@@ -24,7 +24,8 @@ public class GipfyFunSource extends BaseFunSource {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(giphyHost)
                 .queryParam("api_key", "hbWbSmW11Ev3R6BAsFb5RdH7LQ7orQrY")
-                .queryParam("q", "Cat");
+                .queryParam("q", "Cat")
+                .queryParam("limit", 2);
 
         UriComponents uriComponents = builder.build().encode();
         String url = uriComponents.toUri().toString();
@@ -36,7 +37,7 @@ public class GipfyFunSource extends BaseFunSource {
 
         List<FunMessage> messages = new ArrayList<>();
         for (GiphyObject gif : giphyResponse.getData()) {
-            messages.add(new FunMessage(gif.getUrl(), "GIPHY"));
+            messages.add(new FunMessage(gif.getUrl(), "Giphy Cat"));
         }
         return messages;
     }
