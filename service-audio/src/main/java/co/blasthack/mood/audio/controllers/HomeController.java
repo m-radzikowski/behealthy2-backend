@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import ws.schild.jave.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +34,7 @@ class HomeController {
     @RequestMapping("/test")
     public String test() throws IOException {
         File audioSample = loadAudioSample();
+
         byte[] data = Files.readAllBytes(audioSample.toPath());
         // en-GB  pl-PL
         String audioResponse = audioTranscription(data, "pl-PL");
@@ -51,26 +51,6 @@ class HomeController {
         ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
         return result.getBody();
     }
-
-    /*private File convertToWav(File source) throws IOException {
-        File target = File.createTempFile("", "");
-
-        //Audio Attributes
-        AudioAttributes audio = new AudioAttributes();
-        audio.setCodec("libmp3lame");
-        audio.setBitRate(128000);
-        audio.setChannels(2);
-        audio.setSamplingRate(44100);
-
-        //Encoding attributes
-        EncodingAttributes attrs = new EncodingAttributes();
-        attrs.setFormat("mp3");
-        attrs.setAudioAttributes(audio);
-
-        //Encode
-        Encoder encoder = new Encoder();
-        encoder.encode(new MultimediaObject(source), target, attrs);
-    }*/
 
     private String audioTranscription(byte[] audioData, String locale) {
         StringBuilder textResponse = new StringBuilder();
@@ -117,6 +97,6 @@ class HomeController {
 
     private File loadAudioSample() throws FileNotFoundException {
         return ResourceUtils.getFile("classpath:sample_pl.wav");
-        //return ResourceUtils.getFile("classpath:sample.wav");
+        //return ResourceUtils.getFile("classpath:sample_pl.webm");
     }
 }
