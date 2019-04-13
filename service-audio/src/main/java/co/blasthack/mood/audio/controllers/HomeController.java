@@ -1,12 +1,14 @@
 package co.blasthack.mood.audio.controllers;
 
+import co.blasthack.mood.audio.model.MoodAudioMessage;
+import co.blasthack.mood.audio.model.MoodTextMessage;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
@@ -14,7 +16,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/")
@@ -26,16 +30,29 @@ class HomeController {
         this.restTemplate = restTemplate;
     }
 
+    /*
+        Test method to check connection with Google Cloud Speech to Text API using sample wav data
+     */
     @RequestMapping("/test")
-    public String test() {
+    public String test() throws IOException {
+        File audioSample = loadAudioSample();
+        byte[] data = Files.readAllBytes(audioSample.toPath());
+        String audioResponse = audioTranscription(data, "en-EN");
 
-        String audioResponse = analiseAudio();
-        String textResponse = restTemplate.getForObject("http://text-service/test/", String.class);
-
-        return "::: AUDIO(google) --> " + audioResponse + "  ::: TEXT(service) --> " + textResponse;
+        return "Text: " + audioResponse;
     }
 
-    private String analiseAudio() {
+    @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")
+    public @ResponseBody
+    String rateMoodOfText(@RequestBody MoodAudioMessage data) {
+        String transcribedAudio = audioTranscription(data.getMessage(), "pl-PL");
+        MoodTextMessage textMessage = new MoodTextMessage("text-id", transcribedAudio);
+
+        ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
+        return result.getBody();
+    }
+
+    private String audioTranscription(byte[] audioData, String locale) {
         StringBuilder textResponse = new StringBuilder();
         try {
 
@@ -49,15 +66,12 @@ class HomeController {
 
             SpeechClient speechClient = SpeechClient.create(speechSettings);
 
-            File audioSample = loadAudioSample();
-            byte[] data = Files.readAllBytes(audioSample.toPath());
-            ByteString audioBytes = ByteString.copyFrom(data);
+            ByteString audioBytes = ByteString.copyFrom(audioData);
 
             // Builds the sync recognize request
             RecognitionConfig config = RecognitionConfig.newBuilder()
                     .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-                    .setSampleRateHertz(8000)
-                    .setLanguageCode("en-US")
+                    .setLanguageCode(locale)
                     .build();
 
             RecognitionAudio audio = RecognitionAudio.newBuilder()
