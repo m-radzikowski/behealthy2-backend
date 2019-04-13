@@ -10,7 +10,10 @@ from wit_ai_service.wit_ai_main import WitService
 from utils.validation import Validator
 from utils.logger import Logger
 
-
+request_to_send = dict(
+    id = 'mojId',
+    message = ""
+)
 app = Flask(__name__)
 api = Api(app)
 configuration = None
@@ -71,26 +74,25 @@ class SentimentHandler(Resource):
                 tokenizer = nltk.data.load('tokenizers/punkt/polish.pickle')
                 res = tokenizer.tokenize(msg_text)
                 for sent in res:
-                    if len(sent) > 250:
-                        splitat = 249
+                    if len(sent) > 249:
+                        splitat = 248
                         l, r = sent[:splitat], sent[splitat:]
                         to_send.append(l)
                         to_send.append(r)
                         continue
                     to_send.append(sent)
             else:
-                to_send.append(req)
+                request_to_send['message'] = req['message']
+                to_send.append(request_to_send)
             for sent in to_send:
-                req['message'] = sent
-                wit_response = wit_service.write_to(req)
+                request_to_send['message'] = sent
+                wit_response = wit_service.write_to(request_to_send)
                 if wit_response is not None:
                     responses.append(wit_response)
-            print(len(to_send))
-            print(len(responses))
+            value = 0
             for response in responses:
-                print(response)
-            #return wit_response, 200
-            return responses, 200
+                value = value + response
+            return value, 200
         return 'Internal api server issue', 500
 
 api.add_resource(SentimentHandler, '/sentiment')

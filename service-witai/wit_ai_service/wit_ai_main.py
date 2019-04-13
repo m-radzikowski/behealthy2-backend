@@ -8,16 +8,20 @@ class WitService(ResponseComposer):
     
     @staticmethod
     def compose_response(message_from_wit, msg_id):
+        end_value = 0
         if 'entities' in message_from_wit.keys():
                 if'sentiment' in message_from_wit['entities'].keys():
                     for sugestion in message_from_wit['entities']['sentiment']:
                         if all (k in sugestion.keys() for k in ('confidence','value')):
-                            return {
-                            'confidence': sugestion['confidence'],
-                            'value': sugestion['value'].upper(),
-                            'id': msg_id
-                            }
-        return None
+                            if sugestion['value'].upper()=="NEGATIVE":
+                                end_value = end_value - sugestion['confidence']
+                            if sugestion['value'].upper() == "POSITIVE":
+                                end_value = end_value - sugestion['confidence']
+                if 'exaggeration' in message_from_wit['entities'].keys():
+                    for sugestion in message_from_wit['entities']['exaggeration']:
+                        if all(k in sugestion.keys() for k in ('confidence', 'value')):
+                            end_value = end_value - 2*sugestion['confidence']
+        return end_value
     
     def __init__(self, access_token, location_response_logic_list):
         super().__init__(location_response_logic_list)
