@@ -1,4 +1,4 @@
-package co.blasthack.mood.controllers;
+package co.blasthack.mood.audio.controllers;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

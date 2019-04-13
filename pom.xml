@@ -12,6 +12,7 @@
         <module>service-eureka</module>
         <module>service-zuul</module>
         <module>service-text</module>
+        <module>service-audio</module>
     </modules>
 
 </project>
