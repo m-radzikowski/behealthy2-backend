@@ -41,8 +41,8 @@ class HomeController {
 
     @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")
     public @ResponseBody
-    String rateMoodOfText(@RequestBody MoodAudioMessage data) {
-        String transcribedAudio = audioTranscription(data.getMessage());
+    String rateMoodOfText(@RequestBody byte[] audioData) {
+        String transcribedAudio = audioTranscription(audioData);
         MoodTextMessage textMessage = new MoodTextMessage(transcribedAudio);
 
         ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
@@ -67,7 +67,7 @@ class HomeController {
                     .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16) // LINEAR16 for WAV
                     .setLanguageCode("pl-PL")
                     .setEnableAutomaticPunctuation(false)
-                    //.setSampleRateHertz(48000)
+                    //.setSampleRateHertz(48000) // WAV doesnt need
                     .setModel("command_and_search") // default
                     .build();
 
@@ -93,7 +93,6 @@ class HomeController {
     }
 
     private File loadAudioSample() throws FileNotFoundException {
-        return ResourceUtils.getFile("classpath:sample_pl.wav");
-        //return ResourceUtils.getFile("classpath:sample_pl.webm");
+        return ResourceUtils.getFile("classpath:sample.wav");
     }
 }
