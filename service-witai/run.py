@@ -2,6 +2,10 @@ from flask import Flask, request
 from flask_restful import reqparse, abort, Api, Resource
 import json
 import sys
+import nltk.data
+import nltk.tokenize.punkt
+
+import os
 from wit_ai_service.wit_ai_main import WitService
 from utils.validation import Validator
 from utils.logger import Logger
@@ -13,13 +17,14 @@ configuration = None
 location_response_logic_list = None
 wit_service = None
 watson_service = None
-
+nltk.download('punkt')
+print(os.getcwd())
 
 def read_configuation():
     global configuration
     global location_response_logic_list
     try:
-        configuration = json.loads(open('/home/gabrys/repozytoria/witai/cityhack-wit/config.json', 'r').read())
+        configuration = json.loads(open('/home/gabrys/repozytoria/behealthy2-backend/service-witai/config.json', 'r').read())
     except:
         Exception('config file does not exists.')
     try:
@@ -58,15 +63,34 @@ class SentimentHandler(Resource):
         client_ip_address = request.remote_addr
         req = request.get_json(force=True)
         Logger.client_ip(client_ip_address)
+        responses = []
         if wit_service and Validator.validate_request(req) is not None:
-            wit_response = wit_service.write_to(req)
-            if wit_response is not None:
-                return wit_response, 200
-            return {
-                'confidence': 0.0,
-                'value': 'NOT_FOUND',
-                'id': req['id']
-                }
+            msg_text = req['message']
+            to_send = []
+            if len(msg_text) >250:
+                tokenizer = nltk.data.load('tokenizers/punkt/polish.pickle')
+                res = tokenizer.tokenize(msg_text)
+                for sent in res:
+                    if len(sent) > 250:
+                        splitat = 249
+                        l, r = sent[:splitat], sent[splitat:]
+                        to_send.append(l)
+                        to_send.append(r)
+                        continue
+                    to_send.append(sent)
+            else:
+                to_send.append(req)
+            for sent in to_send:
+                req['message'] = sent
+                wit_response = wit_service.write_to(req)
+                if wit_response is not None:
+                    responses.append(wit_response)
+            print(len(to_send))
+            print(len(responses))
+            for response in responses:
+                print(response)
+            #return wit_response, 200
+            return responses, 200
         return 'Internal api server issue', 500
 
 api.add_resource(SentimentHandler, '/sentiment')
