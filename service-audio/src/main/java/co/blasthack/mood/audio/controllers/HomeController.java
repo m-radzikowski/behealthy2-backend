@@ -34,25 +34,22 @@ class HomeController {
     @RequestMapping("/test")
     public String test() throws IOException {
         File audioSample = loadAudioSample();
-
         byte[] data = Files.readAllBytes(audioSample.toPath());
-        // en-GB  pl-PL
-        String audioResponse = audioTranscription(data, "pl-PL");
-
+        String audioResponse = audioTranscription(data);
         return "Text: " + audioResponse;
     }
 
     @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")
     public @ResponseBody
     String rateMoodOfText(@RequestBody MoodAudioMessage data) {
-        String transcribedAudio = audioTranscription(data.getMessage(), "pl-PL");
-        MoodTextMessage textMessage = new MoodTextMessage("text-id", transcribedAudio);
+        String transcribedAudio = audioTranscription(data.getMessage());
+        MoodTextMessage textMessage = new MoodTextMessage(transcribedAudio);
 
         ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
         return result.getBody();
     }
 
-    private String audioTranscription(byte[] audioData, String locale) {
+    private String audioTranscription(byte[] audioData) {
         StringBuilder textResponse = new StringBuilder();
         try {
             FileInputStream credentialsStream = new FileInputStream("C:/Java/speech-credentials.json");
@@ -68,7 +65,7 @@ class HomeController {
 
             RecognitionConfig config = RecognitionConfig.newBuilder()
                     .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16) // LINEAR16 for WAV
-                    .setLanguageCode(locale)
+                    .setLanguageCode("pl-PL")
                     .setEnableAutomaticPunctuation(false)
                     //.setSampleRateHertz(48000)
                     .setModel("command_and_search") // default

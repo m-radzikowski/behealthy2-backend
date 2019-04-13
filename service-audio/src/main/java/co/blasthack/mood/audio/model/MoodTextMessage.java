@@ -11,8 +11,5 @@ import lombok.Setter;
 public class MoodTextMessage {
 
     @JsonInclude
-    private String id;
-
-    @JsonInclude
     private String message;
 }
