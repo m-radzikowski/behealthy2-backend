@@ -18,7 +18,7 @@ class HomeController {
     @RequestMapping(path = "/test", method = RequestMethod.GET)
     public @ResponseBody
     String test() {
-        return "This is test response from text-service.";
+        return "This is test response from fun-service.";
     }
 
     @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")

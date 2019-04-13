@@ -13,6 +13,7 @@
         <module>service-zuul</module>
         <module>service-text</module>
         <module>service-audio</module>
+        <module>service-fun</module>
     </modules>
 
 </project>
