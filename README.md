@@ -1,5 +1,9 @@
 # BACKEND
 
+## Setup
+
+Using Google Speech-To-Text requires credentials are required to pass to app.
+
 ## Services
 
 ### service-eureka
@@ -13,10 +17,18 @@ Proxy, gateway. It's the layer between user and all other services.
 It transfers request to other services using names from eureka service.
 
 ### service-text
-Service returning char sequence.
+Service returning value (positive, negative) for specified string input. 
+
+To obtain results it communicates with wit.ai.
+
+### service-audio
+Service returning value (positive, negative) for specified audio input. 
+
+To obtain results first it translates audio to text using Google Cloud Speech-Text API, then it sends string data to text-service and returns results.
 
 ## Tech Stack
 
 - Spring Boot
 - Netflix Zuul
 - Netflix Eureka
+- Google Cloud (Speech-To-Text)

@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>co.blasthack.text</groupId>
+    <groupId>co.blasthack.audio</groupId>
     <artifactId>service-text</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -41,6 +41,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-speech</artifactId>
+            <version>0.80.0-beta</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
             <scope>test</scope>
@@ -60,7 +66,7 @@
     </dependencyManagement>
 
     <build>
-        <finalName>text</finalName>
+        <finalName>audio</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
