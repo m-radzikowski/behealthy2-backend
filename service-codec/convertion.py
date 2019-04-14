@@ -1,5 +1,5 @@
 import subprocess
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, make_response
 from flask_restful import reqparse, abort, Api, Resource
 import json
 import sys
@@ -25,7 +25,7 @@ iterator = 0
 def main():
     return '''
         your endpoint for sending messages
-        is http://api_ip_address/codec
+        is http://api_ip_address/convert
         '''
 class CodecHandler(Resource):
     def post(self):
@@ -38,24 +38,20 @@ class CodecHandler(Resource):
             file_name = "audio" + str(iterator) + ".wav"
             command = "ffmpeg -i audio.webm -ab 160k -ac 1 -ar 44100 -vn " + file_name
             subprocess.call(command, shell=True)
-            with open(file_name, 'rb') as params_source:
-                params = params_source.read()
-            params = bytearray(params)
-            del params[0]
-            params_encoded = base64.b64encode(params)
 
             #audio_file = open(file_name, "rb")
             #enc = base64.b64encode(audio_file.read())
             #audio_file.close()
 
-            to_send = dict(
-                audio = params_encoded
-            )
-
-            return to_send, 200
+            path = "/home/gabrys/repozytoria/behealthy2-backend/service-codec/" + file_name
+            return send_file(
+                             path,
+                             mimetype="audio/wav",
+                             as_attachment=True,
+                             attachment_filename=file_name)
         return 'Internal api server issue', 500
 
-api.add_resource(CodecHandler, '/codec')
+api.add_resource(CodecHandler, '/convert')
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
