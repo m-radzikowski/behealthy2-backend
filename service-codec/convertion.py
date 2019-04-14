@@ -11,12 +11,13 @@ from utils.validation import Validator
 import array
 import pickle
 from time import sleep
+import time
 
-#your_rest_server_port = 5001
+your_rest_server_port = 5001
 # The flowing code will register your server to eureka server and also start to send heartbeat every 30 seconds
-#eureka_client.init(eureka_server="http://localhost:8761/eureka",
-#                   app_name="codec-service",
-#                   instance_port=your_rest_server_port)
+eureka_client.init(eureka_server="http://localhost:8761/eureka",
+                   app_name="codec-service",
+                   instance_port=your_rest_server_port)
 app = Flask(__name__)
 api = Api(app)
 iterator = 0
@@ -35,7 +36,8 @@ class CodecHandler(Resource):
             decoded = base64.b64decode(data.split(',', 1)[-1])
             with open('audio.webm', 'wb') as w:
                 w.write(decoded)
-            file_name = "audio" + str(iterator) + ".wav"
+            ts = time.time()
+            file_name = "audio" + str(ts) + ".wav"
             command = "ffmpeg -i audio.webm -ab 160k -ac 1 -ar 44100 -vn " + file_name
             subprocess.call(command, shell=True)
 
