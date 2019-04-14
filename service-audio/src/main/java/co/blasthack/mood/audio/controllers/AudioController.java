@@ -44,11 +44,11 @@ class AudioController {
 
     @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")
     public @ResponseBody
-    String rateMoodOfText(@RequestBody byte[] audioData) {
+    Float rateMoodOfText(@RequestBody byte[] audioData) {
         String transcribedAudio = audioTranscription(audioData);
         MoodTextMessage textMessage = new MoodTextMessage(transcribedAudio);
 
-        ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
+        ResponseEntity<Float> result = restTemplate.postForEntity("http://witai-service/sentiment", textMessage, Float.class);
         return result.getBody();
     }
 
