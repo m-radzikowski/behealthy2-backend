@@ -1,6 +1,6 @@
 package co.blasthack.mood.audio.controllers;
 
-import co.blasthack.mood.audio.model.MoodAudioMessage;
+import co.blasthack.mood.audio.config.GoogleAuthConfig;
 import co.blasthack.mood.audio.model.MoodTextMessage;
 import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -20,12 +20,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/")
-class HomeController {
+class AudioController {
 
     private final RestTemplate restTemplate;
 
-    public HomeController(RestTemplate restTemplate) {
+    private final GoogleAuthConfig googleAuthConfig;
+
+    public AudioController(RestTemplate restTemplate, GoogleAuthConfig googleAuthConfig) {
         this.restTemplate = restTemplate;
+        this.googleAuthConfig = googleAuthConfig;
     }
 
     /*
@@ -41,18 +44,18 @@ class HomeController {
 
     @RequestMapping(path = "/mood", method = RequestMethod.POST, produces = "application/json")
     public @ResponseBody
-    String rateMoodOfText(@RequestBody byte[] audioData) {
+    Float rateMoodOfText(@RequestBody byte[] audioData) {
         String transcribedAudio = audioTranscription(audioData);
         MoodTextMessage textMessage = new MoodTextMessage(transcribedAudio);
 
-        ResponseEntity<String> result = restTemplate.postForEntity("http://text-service/mood", textMessage, String.class);
+        ResponseEntity<Float> result = restTemplate.postForEntity("http://witai-service/sentiment", textMessage, Float.class);
         return result.getBody();
     }
 
     private String audioTranscription(byte[] audioData) {
         StringBuilder textResponse = new StringBuilder();
         try {
-            FileInputStream credentialsStream = new FileInputStream("C:/Java/speech-credentials.json");
+            FileInputStream credentialsStream = new FileInputStream(googleAuthConfig.getCredentialFilePath());
             GoogleCredentials credentials = GoogleCredentials.fromStream(credentialsStream);
             FixedCredentialsProvider credentialsProvider = FixedCredentialsProvider.create(credentials);
 

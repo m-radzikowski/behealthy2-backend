@@ -7,11 +7,11 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/")
-class HomeController {
+class TestController {
 
     private final RestTemplate restTemplate;
 
-    public HomeController(RestTemplate restTemplate) {
+    public TestController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

@@ -4,12 +4,12 @@ Backend for mood-sentiment measure plugin.
 
 ## Setup
 
-Using Google Speech-To-Text requires credentials - json is required to pass to app.
+Using Google Speech-To-Text requires credentials - json is required to pass to app in application properties.
 
 To start up start services:
 - Eureka
 - Zuul
-- Text, Audio, WitAI
+- Text, Audio, WitAI, Fun, Codec
 
 ## Services
 
@@ -33,6 +33,12 @@ Service returning value (positive, negative) for specified audio input.
 
 To obtain results first it translates audio to text using Google Cloud Speech-Text API, then it sends string data to text-service and returns results.
 
+### service-fun
+Service that returns random cat gifs from giphy and hot uplifting news from reddit to improve mood.
+
+### service-codec
+Service that converts audio to format can by used by Speech To Text API.
+
 ## Tech Stack
 
 - Spring Boot
@@ -40,3 +46,4 @@ To obtain results first it translates audio to text using Google Cloud Speech-Te
 - Netflix Eureka
 - Google Cloud (Speech-To-Text)
 - Python
+- FFMPEG
