@@ -6,7 +6,6 @@ import co.blasthack.mood.fun.model.GiphyResponseMessage;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -16,16 +15,14 @@ import java.util.List;
 
 public class GipfyFunSource extends BaseFunSource {
 
-    @Override
-    public List<FunMessage> getFunMessages() {
+    private List<FunMessage> getMessagesForSearch(String search) {
         HttpHeaders headers = new HttpHeaders();
-
         String giphyHost = "http://api.giphy.com/v1/gifs/search";
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(giphyHost)
                 .queryParam("api_key", "hbWbSmW11Ev3R6BAsFb5RdH7LQ7orQrY")
-                .queryParam("q", "Cat")
-                .queryParam("limit", 2);
+                .queryParam("q", search)
+                .queryParam("limit", 1);
 
         UriComponents uriComponents = builder.build().encode();
         String url = uriComponents.toUri().toString();
@@ -37,8 +34,16 @@ public class GipfyFunSource extends BaseFunSource {
 
         List<FunMessage> messages = new ArrayList<>();
         for (GiphyObject gif : giphyResponse.getData()) {
-            messages.add(new FunMessage(gif.getUrl(), "Giphy Cat"));
+            messages.add(new FunMessage(gif.getUrl(), "Giphy Trending " + search));
         }
+        return messages;
+    }
+
+    @Override
+    public List<FunMessage> getFunMessages() {
+        List<FunMessage> messages = new ArrayList<>();
+        messages.addAll(getMessagesForSearch("Cat"));
+        messages.addAll(getMessagesForSearch("Dog"));
         return messages;
     }
 
