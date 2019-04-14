@@ -7,8 +7,6 @@ import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1p1beta1.*;
 import com.google.protobuf.ByteString;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.util.ResourceUtils;
@@ -20,9 +18,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -54,30 +49,13 @@ class AudioController {
     Float rateMoodOfText(@RequestBody MoodAudioMessage audioBase64) {
         MoodTextMessage textMessage;
         RestTemplate restTemplate1 = new RestTemplate();
-        restTemplate1.getMessageConverters().add(
-                new ByteArrayHttpMessageConverter());
-
+        restTemplate1.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 
         //ResponseEntity<byte[]> codecResult = restTemplate1.postForEntity("http://codec-service/convert", audioBase64, byte[].class);
         ResponseEntity<byte[]> codecResult = restTemplate1.postForEntity("http://127.0.0.1:5001/convert", audioBase64, byte[].class);
 
-/*
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_OCTET_STREAM));
-        HttpEntity<String> entity = new HttpEntity<String>(headers);
-        ResponseEntity<byte[]> response = restTemplate1.exchange(
-                "http://codec-service/convert",
-                HttpMethod.POST, entity, byte[].class, "1");
-*/
-
-
-
-        //ResponseEntity<File> codecResult = restTemplate1.postForEntity("http://codec-service/convert", audioBase64, File.class);
-
-          //  byte[] data  = Files.readAllBytes(codecResult.getBody());
-
         String transcribedAudio = audioTranscription(codecResult.getBody());
-        textMessage  = new MoodTextMessage(transcribedAudio);
+        textMessage = new MoodTextMessage(transcribedAudio);
 
         ResponseEntity<Float> result = restTemplate.postForEntity("http://witai-service/sentiment", textMessage, Float.class);
 
