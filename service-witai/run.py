@@ -4,6 +4,8 @@ import json
 import sys
 import nltk.data
 import nltk.tokenize.punkt
+import logging
+import py_eureka_client.eureka_client as eureka_client
 
 import os
 from wit_ai_service.wit_ai_main import WitService
@@ -14,6 +16,11 @@ request_to_send = dict(
     id = 'mojId',
     message = ""
 )
+your_rest_server_port = 5000
+# The flowing code will register your server to eureka server and also start to send heartbeat every 30 seconds
+eureka_client.init(eureka_server="http://localhost:8761/eureka",
+                   app_name="witai-service",
+                   instance_port=your_rest_server_port)
 app = Flask(__name__)
 api = Api(app)
 configuration = None
